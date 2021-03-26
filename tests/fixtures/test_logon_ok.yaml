@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: null
+    body: endless=0
     headers:
       Accept:
       - '*/*'
@@ -8,31 +8,36 @@ interactions:
       - gzip,deflate
       Connection:
       - keep-alive
+      Content-Length:
+      - '113'
+      Content-Type:
+      - application/x-www-form-urlencoded
       Host:
       - ruvds.com
       User-Agent:
-      - 'libcloud/3.1.0 '
-    method: GET
-    uri: https://ruvds.com/api/logon/?endless=0&key=KEY&password=PASSWORD&username=EMAIL
+      - 'libcloud/3.3.1 '
+    method: POST
+    uri: https://ruvds.com/api/logon/
   response:
     body:
-      string: '{"rejectReason":7,"errMessage":"Incorrect API key. Please visit account
-        settings page."}'
+      string: '{"rejectReason": 0, "sessionToken": "SESSION_TOKEN", "expire": "27032021141223"}'
     headers:
       Cache-Control:
       - private
       Connection:
       - keep-alive
       Content-Length:
-      - '88'
+      - '126'
       Content-Type:
       - text/x-json; charset=utf-8
       Date:
-      - Sat, 15 Aug 2020 18:05:01 GMT
+      - Fri, 26 Mar 2021 14:12:23 GMT
       Keep-Alive:
       - timeout=60
       Server:
       - ddos-guard
+      Vary:
+      - Accept
       X-AspNet-Version:
       - 4.0.30319
       X-Powered-By:

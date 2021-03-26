@@ -31,7 +31,6 @@ class RUVDSConnection(Connection):
 
     def __init__(self, username, password, key, *args, **kwargs):
         kwargs["url"] = "https://ruvds.com/"
-        self.user_agent_append("ruvdsdriver")
         super().__init__(*args, **kwargs)
         response = self.request(
             action="api/logon/",

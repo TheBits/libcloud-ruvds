@@ -1,54 +1,122 @@
-import vcr
+import functools
+import json
+import os
+from collections import namedtuple
+from pathlib import Path
+
 import pytest
-
+import vcr
 from libcloud.common.types import InvalidCredsError
-from ruvdsdriver import RUVDSConnection
+
+from ruvdsdriver import RUVDSConnection, RUVDSNodeDriver
+
+cred_keys = ("username", "password", "key")
 
 
-@vcr.use_cassette('./tests/fixtures/logon.yaml')
-def test_logon_ok():
-    ruvds = RUVDSConnection('EMAIL', 'PASSWORD', 'KEY')
-    assert ruvds.session_token == 'SESSION_TOKEN'
+filter_query = (
+    ("username", "USERNAME"),
+    ("password", "PASSWORD"),
+    ("key", "KEY"),
+    ("sessionToken", "SESSION_TOKEN"),
+)
 
 
-@vcr.use_cassette('./tests/fixtures/logon_empty_email_and_password.yaml')
-def test_logon_empty_email_and_password():
+def filter_response(response):
+    try:
+        del response["headers"]["Set-Cookie"]
+    except KeyError:
+        pass
+
+    body = json.loads(response["body"]["string"])
+    if "sessionToken" in body:
+        body["sessionToken"] = "SESSION_TOKEN"
+        response["body"]["string"] = json.dumps(body)
+
+    return response
+
+
+def vcr_record(f):
+    @functools.wraps(f)
+    def wrapper(*args, **kwds):
+        path = Path("./tests/fixtures/") / f"{f.__name__}.yaml"
+        kwargs = dict(
+            filter_post_data_parameters=cred_keys,
+            filter_query_parameters=filter_query,
+            match_on=["method", "path"],
+            path=str(path),
+        )
+        if not path.exists():
+            kwargs["before_record_response"] = filter_response
+        with vcr.use_cassette(**kwargs):
+            return f(*args, **kwds)
+
+    return wrapper
+
+
+@pytest.fixture
+def ruvds_creds():
+    Creds = namedtuple("Creds", cred_keys)
+    creds = Creds(username=os.getenv("RUVDS_USERNAME"), password=os.getenv("RUVDS_PASSWORD"), key=os.getenv("RUVDS_KEY"))
+    return creds
+
+
+@vcr_record
+def test_logon_ok(ruvds_creds):
+    ruvds = RUVDSConnection(ruvds_creds.username, ruvds_creds.password, ruvds_creds.key)
+    assert len(ruvds.session_token) in (13, 64)
+
+
+@vcr_record
+def test_logon_empty_username_and_password(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        ruvds = RUVDSConnection('', '', 'KEY')
-    assert e.value.value == 'Username is not specified or incorrect'
+        RUVDSConnection("", "", ruvds_creds.key)
+    assert e.value.value == "Username is not specified or incorrect"
 
 
-@vcr.use_cassette('./tests/fixtures/logon_empty_email.yaml')
-def test_logon_empty_email():
+@vcr_record
+def test_logon_empty_username(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        ruvds = RUVDSConnection('', 'PASSWORD', 'KEY')
-    assert e.value.value == 'Username is not specified or incorrect'
-    
+        RUVDSConnection("", ruvds_creds.password, ruvds_creds.key)
+    assert e.value.value == "Username is not specified or incorrect"
 
-@vcr.use_cassette('./tests/fixtures/logon_empty_password.yaml')
-def test_logon_empty_password():
+
+@vcr_record
+def test_logon_invalid_username(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        ruvds = RUVDSConnection('EMAIL', '', 'KEY')
-    assert e.value.value == 'Password is not specified'
+        RUVDSConnection("invalid_username", ruvds_creds.password, ruvds_creds.key)
+    assert e.value.value == "Username is not specified or incorrect"
 
 
-@vcr.use_cassette('./tests/fixtures/logon_wrong_password.yaml')
-def test_logon_wrong_password():
+@vcr_record
+def test_logon_empty_password(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        ruvds = RUVDSConnection('EMAIL', 'PASSWORD', 'KEY')
-    assert e.value.value == 'User not found or incorrect password'
+        RUVDSConnection(ruvds_creds.username, "", ruvds_creds.key)
+    assert e.value.value == "Password is not specified"
 
 
-@vcr.use_cassette('./tests/fixtures/logon_empty_key.yaml')
-def test_logon_empty_key():
+@vcr_record
+def test_logon_wrong_password(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        ruvds = RUVDSConnection('EMAIL', 'PASSWORD', '')
-    assert e.value.value == 'API key is not specified. Please visit account settings page.'
+        RUVDSConnection(ruvds_creds.username, "invalid_password", ruvds_creds.key)
+    assert e.value.value == "User not found or incorrect password"
 
 
-@vcr.use_cassette('./tests/fixtures/logon_wrong_key.yaml')
-def test_logon_wrong_key():
+@vcr_record
+def test_logon_empty_key(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        ruvds = RUVDSConnection('EMAIL', 'PASSWORD', 'KEY')
-    assert e.value.value == 'Incorrect API key. Please visit account settings page.'
+        RUVDSConnection(ruvds_creds.username, ruvds_creds.password, "")
+    assert e.value.value == "API key is not specified. Please visit account settings page."
 
+
+@vcr_record
+def test_logon_wrong_key(ruvds_creds):
+    with pytest.raises(InvalidCredsError) as e:
+        RUVDSConnection(ruvds_creds.username, ruvds_creds.password, "invalid_key")
+    assert e.value.value == "Incorrect API key. Please visit account settings page."
+
+
+@vcr_record
+def test_locations(ruvds_creds):
+    ruvds = RUVDSNodeDriver(ruvds_creds.username, ruvds_creds.password, ruvds_creds.key)
+    locs = ruvds.list_locations()
+    assert len(locs) == 11
