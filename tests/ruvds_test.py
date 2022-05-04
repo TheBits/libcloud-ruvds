@@ -53,7 +53,7 @@ def vcr_record(f):
     return wrapper
 
 
-@pytest.fixture
+@pytest.fixture()
 def ruvds_creds():
     Creds = namedtuple("Creds", cred_keys)
     creds = Creds(username=os.getenv("RUVDS_USERNAME"), password=os.getenv("RUVDS_PASSWORD"), key=os.getenv("RUVDS_KEY"))
