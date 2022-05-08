@@ -284,3 +284,23 @@ driver = get_driver('stratuslab')
 | driver   |           |
 | ttl      |           |
 | extra    |           |
+
+## Разработка
+
+В проекте настроена автоматическая проверка линтерами и тестами в GitHub Actions.
+
+### Линтеры
+
+Для запуска линтеров необходимо установить [pre-commit](https://pre-commit.com/). Линтеры запускаются командой `$ pre-commit run -a`.
+
+### Тесты
+
+Тесты запускаются при помощи [pytest](https://pytest.org/).
+
+### Установка
+
+Github Actions запускаются в `stage: commit`, поэтому в `.pre-commit-config.yaml` проверка `id: no-commit-to-branch` установлена в `stage: push`. Что бы проверка запускалась локально и не срабатывала в CI. Локально надо установить pre-commit хуки на пуши и на коммиты следующей командой:
+
+```bash
+$ pre-commit install --hook-type pre-commit --hook-type pre-push
+```

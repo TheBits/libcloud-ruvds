@@ -91,3 +91,4 @@ repos:
         name: pip-compile requirements-dev.in
         args: [requirements-dev.in]
         files: ^requirements-dev\.(in|txt)$
+        stages: [manual]
