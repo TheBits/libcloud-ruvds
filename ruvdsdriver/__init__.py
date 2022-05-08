@@ -1,9 +1,11 @@
+import json
 import warnings
 
 from libcloud.common.base import Connection, JsonResponse
 from libcloud.common.exceptions import RateLimitReachedError
 from libcloud.common.types import InvalidCredsError, ServiceUnavailableError
 from libcloud.compute.base import NodeDriver, NodeImage, NodeLocation
+from libcloud.utils.py3 import httplib
 
 
 class RUVDSResponse(JsonResponse):
@@ -29,18 +31,23 @@ class RUVDSConnection(Connection):
     responseCls = RUVDSResponse
     session_token = None
 
-    def __init__(self, username, password, key, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         kwargs["url"] = "https://ruvds.com/"
+        username = kwargs.pop("username", None)
+        password = kwargs.pop("password", None)
+        key = kwargs.pop("key", None)
         super().__init__(*args, **kwargs)
+        data = dict(
+            username=username,
+            password=password,
+            key=key,
+            endless=0,
+        )
+        data = json.dumps(data)
         response = self.request(
             action="api/logon/",
             method="POST",
-            data=dict(
-                username=username,
-                password=password,
-                key=key,
-                endless=0,
-            ),
+            data=data,
         )
 
         self.session_token = response.object["sessionToken"]
@@ -103,3 +110,7 @@ class RUVDSNodeDriver(NodeDriver):
             for n in response.object["items"]:
                 nodes.append(n)
         return nodes
+
+    def create_node(self, **kwargs) -> bool:
+        response = self.connection.request("api/server/create/", params=kwargs, method="POST")
+        return response.status == httplib.OK and response.object.get("rejectReason") == 0
