@@ -1,7 +1,7 @@
 import json
 import warnings
 
-from libcloud.common.base import Connection, JsonResponse
+from libcloud.common.base import ConnectionUserAndKey, JsonResponse
 from libcloud.common.exceptions import RateLimitReachedError
 from libcloud.common.types import InvalidCredsError, ServiceUnavailableError
 from libcloud.compute.base import NodeDriver, NodeImage, NodeLocation
@@ -27,7 +27,7 @@ class RUVDSResponse(JsonResponse):
         return body
 
 
-class RUVDSConnection(Connection):
+class RUVDSConnection(ConnectionUserAndKey):
     responseCls = RUVDSResponse
     session_token = None
 
@@ -36,7 +36,7 @@ class RUVDSConnection(Connection):
         username = kwargs.pop("username", None)
         password = kwargs.pop("password", None)
         key = kwargs.pop("key", None)
-        super().__init__(*args, **kwargs)
+        super().__init__(username, key, *args, **kwargs)
         data = dict(
             username=username,
             password=password,
