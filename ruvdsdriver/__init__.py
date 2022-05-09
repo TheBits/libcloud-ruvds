@@ -31,11 +31,9 @@ class RUVDSConnection(ConnectionUserAndKey):
     responseCls = RUVDSResponse
     session_token = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, username, key, *args, **kwargs):
         kwargs["url"] = "https://ruvds.com/"
-        username = kwargs.pop("username", None)
         password = kwargs.pop("password", None)
-        key = kwargs.pop("key", None)
         super().__init__(username, key, *args, **kwargs)
         data = dict(
             username=username,

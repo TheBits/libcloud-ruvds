@@ -62,75 +62,75 @@ def ruvds_creds():
 
 @vcr_record
 def test_logon_ok(ruvds_creds):
-    ruvds = RUVDSConnection(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
+    ruvds = RUVDSConnection(ruvds_creds.username, ruvds_creds.key, password=ruvds_creds.password)
     assert len(ruvds.session_token) in (13, 64)
 
 
 @vcr_record
 def test_logon_empty_username_and_password(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        RUVDSConnection(username="", password="", key=ruvds_creds.key)
+        RUVDSConnection("", ruvds_creds.key, password="")
     assert e.value.value == "Username is not specified or incorrect"
 
 
 @vcr_record
 def test_logon_empty_username(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        RUVDSConnection(username="", password=ruvds_creds.password, key=ruvds_creds.key)
+        RUVDSConnection("", ruvds_creds.key, password=ruvds_creds.password)
     assert e.value.value == "Username is not specified or incorrect"
 
 
 @vcr_record
 def test_logon_invalid_username(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        RUVDSConnection(username="invalid_username", password=ruvds_creds.password, key=ruvds_creds.key)
+        RUVDSConnection("invalid_username", ruvds_creds.key, password=ruvds_creds.password)
     assert e.value.value == "Username is not specified or incorrect"
 
 
 @vcr_record
 def test_logon_empty_password(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        RUVDSConnection(username=ruvds_creds.username, password="", key=ruvds_creds.key)
+        RUVDSConnection(ruvds_creds.username, ruvds_creds.key, password="")
     assert e.value.value == "Password is not specified"
 
 
 @vcr_record
 def test_logon_wrong_password(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        RUVDSConnection(username=ruvds_creds.username, password="invalid_password", key=ruvds_creds.key)
+        RUVDSConnection(ruvds_creds.username, ruvds_creds.key, password="invalid_password")
     assert e.value.value == "User not found or incorrect password"
 
 
 @vcr_record
 def test_logon_empty_key(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        RUVDSConnection(username=ruvds_creds.username, password=ruvds_creds.password, key="")
+        RUVDSConnection(ruvds_creds.username, "", password=ruvds_creds.password)
     assert e.value.value == "API key is not specified. Please visit account settings page."
 
 
 @vcr_record
 def test_logon_wrong_key(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
-        RUVDSConnection(username=ruvds_creds.username, password=ruvds_creds.password, key="invalid_key")
+        RUVDSConnection(ruvds_creds.username, "invalid_key", password=ruvds_creds.password)
     assert e.value.value == "Incorrect API key. Please visit account settings page."
 
 
 @vcr_record
 def test_locations(ruvds_creds):
-    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
+    ruvds = RUVDSNodeDriver(ruvds_creds.username, ruvds_creds.key, password=ruvds_creds.password)
     locs = ruvds.list_locations()
     assert len(locs) == 11
 
 
 @vcr_record
 def test_create_node(ruvds_creds):
-    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
+    ruvds = RUVDSNodeDriver(ruvds_creds.username, ruvds_creds.key, password=ruvds_creds.password)
     response = ruvds.create_node()
     assert response is True
 
 
 @vcr_record
 def test_create_node_error(ruvds_creds):
-    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
+    ruvds = RUVDSNodeDriver(ruvds_creds.username, ruvds_creds.key, password=ruvds_creds.password)
     response = ruvds.create_node()
     assert response is False
