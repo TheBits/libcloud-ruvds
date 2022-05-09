@@ -67,6 +67,12 @@ def test_logon_ok(ruvds_creds):
 
 
 @vcr_record
+def test_logon_endless(ruvds_creds):
+    ruvds = RUVDSConnection(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key, endless=1)
+    assert len(ruvds.session_token) in (13, 64)
+
+
+@vcr_record
 def test_logon_empty_username_and_password(ruvds_creds):
     with pytest.raises(InvalidCredsError) as e:
         RUVDSConnection(username="", password="", key=ruvds_creds.key)

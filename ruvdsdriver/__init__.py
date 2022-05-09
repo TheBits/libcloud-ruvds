@@ -36,12 +36,13 @@ class RUVDSConnection(Connection):
         username = kwargs.pop("username", None)
         password = kwargs.pop("password", None)
         key = kwargs.pop("key", None)
+        endless = kwargs.pop("endless", 0)
         super().__init__(*args, **kwargs)
         data = dict(
             username=username,
             password=password,
             key=key,
-            endless=0,
+            endless=endless,
         )
         data = json.dumps(data)
         response = self.request(
@@ -62,6 +63,15 @@ class RUVDSNodeDriver(NodeDriver):
     connectionCls = RUVDSConnection
     name = "RUVDS"
     website = "https://ruvds.com/"
+
+    def __init__(self, key, secret=None, secure=True, host=None, port=None, api_version=None, region=None, **kwargs):
+        self.endless = kwargs.get("endless", 0)
+        super().__init__(key, secret, secure, host, port, api_version, region, **kwargs)
+
+    def _ex_connection_class_kwargs(self):
+        kwargs = super()._ex_connection_class_kwargs()
+        kwargs.update({"endless": self.endless})
+        return kwargs
 
     def list_locations(self):
         response = self.connection.request("api/datacenter")

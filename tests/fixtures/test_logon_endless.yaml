@@ -1,0 +1,48 @@
+interactions:
+- request:
+    body: endless=0
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip,deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '113'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - ruvds.com
+      User-Agent:
+      - 'libcloud/3.3.1 '
+    method: POST
+    uri: https://ruvds.com/api/logon/
+  response:
+    body:
+      string: '{"rejectReason":0,"sessionToken":"SESSION_TOKEN","expire":null}'
+    headers:
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '126'
+      Content-Type:
+      - text/x-json; charset=utf-8
+      Date:
+      - Fri, 26 Mar 2021 14:12:23 GMT
+      Keep-Alive:
+      - timeout=60
+      Server:
+      - ddos-guard
+      Vary:
+      - Accept
+      X-AspNet-Version:
+      - 4.0.30319
+      X-Powered-By:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1
