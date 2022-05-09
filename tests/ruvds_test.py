@@ -132,5 +132,33 @@ def test_create_node(ruvds_creds):
 @vcr_record
 def test_create_node_error(ruvds_creds):
     ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
-    response = ruvds.create_node()
-    assert response is False
+    result = ruvds.create_node()
+    assert result is False
+
+
+@vcr_record
+def test_start_node(ruvds_creds):
+    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
+    result = ruvds.start_node(123)
+    assert result is True
+
+
+@vcr_record
+def test_stop_node(ruvds_creds):
+    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
+    result = ruvds.stop_node(123)
+    assert result is True
+
+
+@vcr_record
+def test_reboot_node(ruvds_creds):
+    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
+    result = ruvds.reboot_node(123)
+    assert result is True
+
+
+@vcr_record
+def test_destroy_node(ruvds_creds):
+    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
+    result = ruvds.destroy_node(123)
+    assert result is True
