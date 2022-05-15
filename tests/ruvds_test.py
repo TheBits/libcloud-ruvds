@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 import vcr
 from libcloud.common.types import InvalidCredsError
+from libcloud.compute.base import NodeImage
 
 from ruvdsdriver import RUVDSConnection, RUVDSNodeDriver
 
@@ -134,3 +135,22 @@ def test_create_node_error(ruvds_creds):
     ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
     response = ruvds.create_node()
     assert response is False
+
+
+@vcr_record
+def test_list_images(ruvds_creds):
+    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
+    images = ruvds.list_images()
+    image = images.pop()
+    assert image.id == "12"
+    assert image.name == "Ubuntu 16.04 LTS (ENG)"
+    assert isinstance(image, NodeImage)
+
+
+@vcr_record
+def test_get_image(ruvds_creds):
+    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
+    image = ruvds.get_image("12")
+    assert image.id == "12"
+    assert image.name == "Ubuntu 16.04 LTS (ENG)"
+    assert isinstance(image, NodeImage)

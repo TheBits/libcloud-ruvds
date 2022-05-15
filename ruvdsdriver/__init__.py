@@ -1,4 +1,5 @@
 import json
+import typing
 import warnings
 
 from libcloud.common.base import Connection, JsonResponse
@@ -96,6 +97,12 @@ class RUVDSNodeDriver(NodeDriver):
         for image in response.object["os"]:
             images.append(NodeImage(image["Id"], image["Name"], self))
         return images
+
+    def get_image(self, image_id: str) -> typing.Union[None, NodeImage]:
+        for image in self.list_images():
+            if image.id == image_id:
+                return image
+        return None
 
     def list_sizes(self, location=None):
         if location is not None:
