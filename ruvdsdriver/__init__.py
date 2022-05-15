@@ -1,7 +1,8 @@
 import json
+import typing
 import warnings
 
-from libcloud.common.base import Connection, JsonResponse
+from libcloud.common.base import ConnectionUserAndKey, JsonResponse
 from libcloud.common.exceptions import RateLimitReachedError
 from libcloud.common.types import InvalidCredsError, ServiceUnavailableError
 from libcloud.compute.base import NodeDriver, NodeImage, NodeLocation
@@ -27,16 +28,14 @@ class RUVDSResponse(JsonResponse):
         return body
 
 
-class RUVDSConnection(Connection):
+class RUVDSConnection(ConnectionUserAndKey):
     responseCls = RUVDSResponse
     session_token = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, username, key, *args, **kwargs):
         kwargs["url"] = "https://ruvds.com/"
-        username = kwargs.pop("username", None)
         password = kwargs.pop("password", None)
-        key = kwargs.pop("key", None)
-        super().__init__(*args, **kwargs)
+        super().__init__(username, key, *args, **kwargs)
         data = dict(
             username=username,
             password=password,
@@ -96,6 +95,12 @@ class RUVDSNodeDriver(NodeDriver):
         for image in response.object["os"]:
             images.append(NodeImage(image["Id"], image["Name"], self))
         return images
+
+    def get_image(self, image_id: str) -> typing.Union[None, NodeImage]:
+        for image in self.list_images():
+            if image.id == image_id:
+                return image
+        return None
 
     def list_sizes(self, location=None):
         if location is not None:
