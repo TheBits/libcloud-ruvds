@@ -1,0 +1,90 @@
+interactions:
+- request:
+    body: endless=0
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip,deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '113'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Host:
+      - ruvds.com
+      User-Agent:
+      - 'libcloud/3.3.1 '
+    method: POST
+    uri: https://ruvds.com/api/logon/
+  response:
+    body:
+      string: '{"rejectReason": 0, "sessionToken": "SESSION_TOKEN", "expire": "27032021141225"}'
+    headers:
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '126'
+      Content-Type:
+      - text/x-json; charset=utf-8
+      Date:
+      - Fri, 26 Mar 2021 14:12:24 GMT
+      Keep-Alive:
+      - timeout=60
+      Server:
+      - ddos-guard
+      Vary:
+      - Accept
+      X-AspNet-Version:
+      - 4.0.30319
+      X-Powered-By:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip,deflate
+      Connection:
+      - keep-alive
+      Host:
+      - ruvds.com
+      User-Agent:
+      - 'libcloud/3.3.1 (RUVDS) '
+    method: GET
+    uri: https://ruvds.com/api/os
+  response:
+    body:
+      string: '{"rejectReason":0,"os":[{"Id":15,"Name":"Windows Server 2019 (RUS)"},{"Id":16,"Name":"Windows Server 2019 (ENG)"},{"Id":13,"Name":"Windows Server 2016 (RUS)"},{"Id":14,"Name":"Windows Server 2016 (ENG)"},{"Id":1,"Name":"Windows Server 2012 R2 (RUS)"},{"Id":2,"Name":"Windows Server 2012 R2 (ENG)"},{"Id":5,"Name":"Windows Server 2003 R2 SP2 (RUS)"},{"Id":6,"Name":"Windows Server 2003 R2 SP2 (ENG)"},{"Id":17,"Name":"Debian 9.6 (ENG)"},{"Id":8,"Name":"Debian 8.5 (ENG)"},{"Id":19,"Name":"CentOS 7.6.1810 (ENG)"},{"Id":10,"Name":"CentOS 7.2.1511 (ENG)"},{"Id":18,"Name":"Ubuntu 18.04 LTS (ENG)"},{"Id":12,"Name":"Ubuntu 16.04 LTS (ENG)"}]}'
+    headers:
+      Cache-Control:
+      - private
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4554'
+      Content-Type:
+      - text/x-json; charset=utf-8
+      Date:
+      - Fri, 26 Mar 2021 14:12:24 GMT
+      Keep-Alive:
+      - timeout=60
+      Server:
+      - ddos-guard
+      Vary:
+      - Accept
+      X-AspNet-Version:
+      - 4.0.30319
+      X-Powered-By:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,7 +1,8 @@
 import json
+import typing
 import warnings
 
-from libcloud.common.base import Connection, JsonResponse
+from libcloud.common.base import ConnectionUserAndKey, JsonResponse
 from libcloud.common.exceptions import RateLimitReachedError
 from libcloud.common.types import InvalidCredsError, ServiceUnavailableError
 from libcloud.compute.base import NodeDriver, NodeImage, NodeLocation
@@ -27,17 +28,16 @@ class RUVDSResponse(JsonResponse):
         return body
 
 
-class RUVDSConnection(Connection):
+class RUVDSConnection(ConnectionUserAndKey):
     responseCls = RUVDSResponse
     session_token = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, username, key, *args, **kwargs):
         kwargs["url"] = "https://ruvds.com/"
-        username = kwargs.pop("username", None)
         password = kwargs.pop("password", None)
         key = kwargs.pop("key", None)
         endless = kwargs.pop("endless", 0)
-        super().__init__(*args, **kwargs)
+        super().__init__(username, key, *args, **kwargs)
         data = dict(
             username=username,
             password=password,
@@ -107,6 +107,12 @@ class RUVDSNodeDriver(NodeDriver):
             images.append(NodeImage(image["Id"], image["Name"], self))
         return images
 
+    def get_image(self, image_id: str) -> typing.Union[None, NodeImage]:
+        for image in self.list_images():
+            if image.id == image_id:
+                return image
+        return None
+
     def list_sizes(self, location=None):
         if location is not None:
             warnings.warn("location argument ignored")
@@ -124,3 +130,23 @@ class RUVDSNodeDriver(NodeDriver):
     def create_node(self, **kwargs) -> bool:
         response = self.connection.request("api/server/create/", params=kwargs, method="POST")
         return response.status == httplib.OK and response.object.get("rejectReason") == 0
+
+    def _run_command(self, command: str, node_id: int):
+        params = {
+            "type": command,
+            "id": node_id,
+        }
+        response = self.connection.request("api/server/command/", params=params, method="POST")
+        return response.status == httplib.OK and response.object.get("rejectReason") == 0
+
+    def stop_node(self, node_id: int) -> bool:
+        return self._run_command("stop", node_id)
+
+    def start_node(self, node_id: int) -> bool:
+        return self._run_command("start", node_id)
+
+    def reboot_node(self, node_id: int) -> bool:
+        return self._run_command("reset", node_id)
+
+    def destroy_node(self, node_id: int) -> bool:
+        return self._run_command("remove", node_id)
