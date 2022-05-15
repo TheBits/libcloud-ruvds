@@ -119,3 +119,23 @@ class RUVDSNodeDriver(NodeDriver):
     def create_node(self, **kwargs) -> bool:
         response = self.connection.request("api/server/create/", params=kwargs, method="POST")
         return response.status == httplib.OK and response.object.get("rejectReason") == 0
+
+    def _run_command(self, command: str, node_id: int):
+        params = {
+            "type": command,
+            "id": node_id,
+        }
+        response = self.connection.request("api/server/command/", params=params, method="POST")
+        return response.status == httplib.OK and response.object.get("rejectReason") == 0
+
+    def stop_node(self, node_id: int) -> bool:
+        return self._run_command("stop", node_id)
+
+    def start_node(self, node_id: int) -> bool:
+        return self._run_command("start", node_id)
+
+    def reboot_node(self, node_id: int) -> bool:
+        return self._run_command("reset", node_id)
+
+    def destroy_node(self, node_id: int) -> bool:
+        return self._run_command("remove", node_id)
