@@ -1,4 +1,6 @@
 .direnv/
 .envrc
 __pycache__/
-.tox/
+.tox/*
+.coverage
+bin/*
