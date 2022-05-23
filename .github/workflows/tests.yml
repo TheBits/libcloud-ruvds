@@ -6,7 +6,9 @@ on:
     branches: [main]
 
 env:
-  DRIVER_TOKEN: github-actions
+  RUVDS_USERNAME: github-actions-username
+  RUVDS_PASSWORD: github-actions-password
+  RUVDS_KEY: github-actions-key
   TOX_PARALLEL_NO_SPINNER: 1
 
 jobs:
