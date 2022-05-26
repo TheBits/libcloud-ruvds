@@ -55,10 +55,40 @@ def vcr_record(f):
 
 
 @pytest.fixture()
-def ruvds_creds():
+def username() -> str:
+    key = os.getenv("RUVDS_USERNAME")
+    if key is None:
+        pytest.exit("set up RUVDS_USERNAME environment variable")
+    return str(key)
+
+
+@pytest.fixture()
+def password() -> str:
+    key = os.getenv("RUVDS_PASSWORD")
+    if key is None:
+        pytest.exit("set up RUVDS_PASSWORD environment variable")
+    return str(key)
+
+
+@pytest.fixture()
+def key() -> str:
+    key = os.getenv("RUVDS_KEY")
+    if key is None:
+        pytest.exit("set up RUVDS_KEY environment variable")
+    return str(key)
+
+
+@pytest.fixture()
+def ruvds_creds(username, password, key):
     Creds = namedtuple("Creds", cred_keys)
-    creds = Creds(username=os.getenv("RUVDS_USERNAME"), password=os.getenv("RUVDS_PASSWORD"), key=os.getenv("RUVDS_KEY"))
+    creds = Creds(username=username, password=password, key=key)
     return creds
+
+
+@pytest.fixture()
+@vcr.use_cassette("./tests/fixtures/test_logon_ok.yaml")
+def compute_conn(ruvds_creds):
+    return RUVDSNodeDriver(ruvds_creds.username, ruvds_creds.key, password=ruvds_creds.password)
 
 
 @vcr_record
@@ -123,58 +153,50 @@ def test_logon_wrong_key(ruvds_creds):
 
 
 @vcr_record
-def test_locations(ruvds_creds):
-    ruvds = RUVDSNodeDriver(ruvds_creds.username, ruvds_creds.key, password=ruvds_creds.password)
-    locs = ruvds.list_locations()
+def test_locations(compute_conn):
+    locs = compute_conn.list_locations()
     assert len(locs) == 11
 
 
 @vcr_record
-def test_create_node(ruvds_creds):
-    ruvds = RUVDSNodeDriver(ruvds_creds.username, ruvds_creds.key, password=ruvds_creds.password)
-    response = ruvds.create_node()
+def test_create_node(compute_conn):
+    response = compute_conn.create_node()
     assert response is True
 
 
 @vcr_record
-def test_create_node_error(ruvds_creds):
-    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
-    result = ruvds.create_node()
+def test_create_node_error(compute_conn):
+    result = compute_conn.create_node()
     assert result is False
 
 
 @vcr_record
-def test_start_node(ruvds_creds):
-    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
-    result = ruvds.start_node(123)
+def test_start_node(compute_conn):
+    result = compute_conn.start_node(123)
     assert result is True
 
 
 @vcr_record
-def test_stop_node(ruvds_creds):
-    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
-    result = ruvds.stop_node(123)
+def test_stop_node(compute_conn):
+    result = compute_conn.stop_node(123)
     assert result is True
 
 
 @vcr_record
-def test_reboot_node(ruvds_creds):
-    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
-    result = ruvds.reboot_node(123)
+def test_reboot_node(compute_conn):
+    result = compute_conn.reboot_node(123)
     assert result is True
 
 
 @vcr_record
-def test_destroy_node(ruvds_creds):
-    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
-    result = ruvds.destroy_node(123)
+def test_destroy_node(compute_conn):
+    result = compute_conn.destroy_node(123)
     assert result is True
 
 
 @vcr_record
-def test_list_images(ruvds_creds):
-    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
-    images = ruvds.list_images()
+def test_list_images(compute_conn):
+    images = compute_conn.list_images()
     image = images.pop()
     assert image.id == "12"
     assert image.name == "Ubuntu 16.04 LTS (ENG)"
@@ -182,9 +204,8 @@ def test_list_images(ruvds_creds):
 
 
 @vcr_record
-def test_get_image(ruvds_creds):
-    ruvds = RUVDSNodeDriver(username=ruvds_creds.username, password=ruvds_creds.password, key=ruvds_creds.key)
-    image = ruvds.get_image("12")
+def test_get_image(compute_conn):
+    image = compute_conn.get_image("12")
     assert image.id == "12"
     assert image.name == "Ubuntu 16.04 LTS (ENG)"
     assert isinstance(image, NodeImage)
