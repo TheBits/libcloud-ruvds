@@ -1,7 +1,6 @@
 import setuptools
 
-with open("README.md") as fh:
-    long_description = fh.read()
+long_description = "[Libcloud](https://libcloud.apache.org/) driver for [https://ruvds.com/](https://ruvds.com/)"
 
 setuptools.setup(
     name="ruvdsdriver",
@@ -19,6 +18,5 @@ setuptools.setup(
         "Intended Audience :: System Administrators",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Topic :: Software Development :: Libraries :: Python Modules",
     ],
 )
